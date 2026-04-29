@@ -1,0 +1,512 @@
+[
+  {
+    "engine": "powerinfer",
+    "prompt": "creative",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 273302.23,
+      "prompt_tokens": 30,
+      "prompt_tok_per_sec": 0.11,
+      "eval_ms": 3385569.23,
+      "eval_tokens": 31,
+      "ms_per_token": 109211.91,
+      "gen_tok_per_sec": 0.01,
+      "total_ms": 3659068.01,
+      "load_ms": 367140.04
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "creative",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 656.82,
+      "prompt_tokens": 30,
+      "prompt_tok_per_sec": 45.67,
+      "eval_ms": 1116.25,
+      "eval_tokens": 31,
+      "ms_per_token": 36.01,
+      "gen_tok_per_sec": 27.77,
+      "total_ms": 1777.25,
+      "load_ms": 84282.21
+    }
+  },
+  {
+    "engine": "powerinfer",
+    "prompt": "creative",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 94570.27,
+      "prompt_tokens": 30,
+      "prompt_tok_per_sec": 0.32,
+      "eval_ms": 3314327.99,
+      "eval_tokens": 63,
+      "ms_per_token": 52608.38,
+      "gen_tok_per_sec": 0.02,
+      "total_ms": 3408948.77,
+      "load_ms": 82721.2
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "creative",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 251.72,
+      "prompt_tokens": 30,
+      "prompt_tok_per_sec": 119.18,
+      "eval_ms": 1853.16,
+      "eval_tokens": 63,
+      "ms_per_token": 29.42,
+      "gen_tok_per_sec": 34.0,
+      "total_ms": 2112.88,
+      "load_ms": 84919.34
+    }
+  },
+  {
+    "engine": "powerinfer",
+    "prompt": "creative",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 97685.24,
+      "prompt_tokens": 30,
+      "prompt_tok_per_sec": 0.31,
+      "eval_ms": 4219221.78,
+      "eval_tokens": 127,
+      "ms_per_token": 33222.22,
+      "gen_tok_per_sec": 0.03,
+      "total_ms": 4317002.57,
+      "load_ms": 77965.4
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "creative",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 623.55,
+      "prompt_tokens": 30,
+      "prompt_tok_per_sec": 48.11,
+      "eval_ms": 4144.69,
+      "eval_tokens": 127,
+      "ms_per_token": 32.64,
+      "gen_tok_per_sec": 30.64,
+      "total_ms": 4783.59,
+      "load_ms": 100537.4
+    }
+  },
+  {
+    "engine": "powerinfer",
+    "prompt": "code",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 69256.63,
+      "prompt_tokens": 22,
+      "prompt_tok_per_sec": 0.32,
+      "eval_ms": 422004.7,
+      "eval_tokens": 31,
+      "ms_per_token": 13613.05,
+      "gen_tok_per_sec": 0.07,
+      "total_ms": 491285.23,
+      "load_ms": 66570.04
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "code",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 870.44,
+      "prompt_tokens": 22,
+      "prompt_tok_per_sec": 25.27,
+      "eval_ms": 902.03,
+      "eval_tokens": 31,
+      "ms_per_token": 29.1,
+      "gen_tok_per_sec": 34.37,
+      "total_ms": 1776.8,
+      "load_ms": 63721.51
+    }
+  },
+  {
+    "engine": "powerinfer",
+    "prompt": "code",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 66938.19,
+      "prompt_tokens": 22,
+      "prompt_tok_per_sec": 0.33,
+      "eval_ms": 1384526.3,
+      "eval_tokens": 63,
+      "ms_per_token": 21976.61,
+      "gen_tok_per_sec": 0.05,
+      "total_ms": 1451516.53,
+      "load_ms": 75207.32
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "code",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 270.45,
+      "prompt_tokens": 22,
+      "prompt_tok_per_sec": 81.35,
+      "eval_ms": 1858.02,
+      "eval_tokens": 63,
+      "ms_per_token": 29.49,
+      "gen_tok_per_sec": 33.91,
+      "total_ms": 2136.66,
+      "load_ms": 64703.03
+    }
+  },
+  {
+    "engine": "powerinfer",
+    "prompt": "code",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 80930.81,
+      "prompt_tokens": 22,
+      "prompt_tok_per_sec": 0.27,
+      "eval_ms": 2481209.18,
+      "eval_tokens": 127,
+      "ms_per_token": 19537.08,
+      "gen_tok_per_sec": 0.05,
+      "total_ms": 2562243.24,
+      "load_ms": 91556.87
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "code",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 393.31,
+      "prompt_tokens": 22,
+      "prompt_tok_per_sec": 55.94,
+      "eval_ms": 3598.84,
+      "eval_tokens": 127,
+      "ms_per_token": 28.34,
+      "gen_tok_per_sec": 35.29,
+      "total_ms": 4007.52,
+      "load_ms": 75213.34
+    }
+  },
+  {
+    "engine": "powerinfer",
+    "prompt": "factual",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 143613.91,
+      "prompt_tokens": 25,
+      "prompt_tok_per_sec": 0.17,
+      "eval_ms": 500060.61,
+      "eval_tokens": 31,
+      "ms_per_token": 16130.99,
+      "gen_tok_per_sec": 0.06,
+      "total_ms": 643698.32,
+      "load_ms": 100125.74
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "factual",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 217.88,
+      "prompt_tokens": 25,
+      "prompt_tok_per_sec": 114.74,
+      "eval_ms": 905.1,
+      "eval_tokens": 31,
+      "ms_per_token": 29.2,
+      "gen_tok_per_sec": 34.25,
+      "total_ms": 1127.69,
+      "load_ms": 58202.09
+    }
+  },
+  {
+    "engine": "powerinfer",
+    "prompt": "factual",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 73658.2,
+      "prompt_tokens": 25,
+      "prompt_tok_per_sec": 0.34,
+      "eval_ms": 1295286.47,
+      "eval_tokens": 63,
+      "ms_per_token": 20560.1,
+      "gen_tok_per_sec": 0.05,
+      "total_ms": 1368999.48,
+      "load_ms": 111372.65
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "factual",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 291.91,
+      "prompt_tokens": 25,
+      "prompt_tok_per_sec": 85.64,
+      "eval_ms": 2044.35,
+      "eval_tokens": 63,
+      "ms_per_token": 32.45,
+      "gen_tok_per_sec": 30.82,
+      "total_ms": 2345.0,
+      "load_ms": 75709.95
+    }
+  },
+  {
+    "engine": "powerinfer",
+    "prompt": "factual",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 88385.47,
+      "prompt_tokens": 25,
+      "prompt_tok_per_sec": 0.28,
+      "eval_ms": 4573185.64,
+      "eval_tokens": 127,
+      "ms_per_token": 36009.34,
+      "gen_tok_per_sec": 0.03,
+      "total_ms": 4661681.3,
+      "load_ms": 90531.48
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "factual",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 5295.73,
+      "prompt_tokens": 25,
+      "prompt_tok_per_sec": 4.72,
+      "eval_ms": 4638.44,
+      "eval_tokens": 127,
+      "ms_per_token": 36.52,
+      "gen_tok_per_sec": 27.38,
+      "total_ms": 9948.53,
+      "load_ms": 83080.93
+    }
+  },
+  {
+    "engine": "powerinfer",
+    "prompt": "reasoning",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 126932.99,
+      "prompt_tokens": 31,
+      "prompt_tok_per_sec": 0.24,
+      "eval_ms": 814982.49,
+      "eval_tokens": 31,
+      "ms_per_token": 26289.76,
+      "gen_tok_per_sec": 0.04,
+      "total_ms": 941940.03,
+      "load_ms": 55865.5
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "reasoning",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 246.51,
+      "prompt_tokens": 31,
+      "prompt_tok_per_sec": 125.75,
+      "eval_ms": 931.07,
+      "eval_tokens": 31,
+      "ms_per_token": 30.03,
+      "gen_tok_per_sec": 33.3,
+      "total_ms": 1182.01,
+      "load_ms": 78745.4
+    }
+  },
+  {
+    "engine": "powerinfer",
+    "prompt": "reasoning",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 87225.87,
+      "prompt_tokens": 31,
+      "prompt_tok_per_sec": 0.36,
+      "eval_ms": 1814517.66,
+      "eval_tokens": 63,
+      "ms_per_token": 28801.87,
+      "gen_tok_per_sec": 0.03,
+      "total_ms": 1901785.66,
+      "load_ms": 87481.76
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "reasoning",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 281.94,
+      "prompt_tokens": 31,
+      "prompt_tok_per_sec": 109.95,
+      "eval_ms": 1778.32,
+      "eval_tokens": 63,
+      "ms_per_token": 28.23,
+      "gen_tok_per_sec": 35.43,
+      "total_ms": 2068.7,
+      "load_ms": 87455.25
+    }
+  },
+  {
+    "engine": "powerinfer",
+    "prompt": "reasoning",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 124451.2,
+      "prompt_tokens": 31,
+      "prompt_tok_per_sec": 0.25,
+      "eval_ms": 3321678.49,
+      "eval_tokens": 127,
+      "ms_per_token": 26154.95,
+      "gen_tok_per_sec": 0.04,
+      "total_ms": 3446228.36,
+      "load_ms": 102633.18
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "reasoning",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 410.67,
+      "prompt_tokens": 31,
+      "prompt_tok_per_sec": 75.49,
+      "eval_ms": 3756.88,
+      "eval_tokens": 127,
+      "ms_per_token": 29.58,
+      "gen_tok_per_sec": 33.8,
+      "total_ms": 4183.86,
+      "load_ms": 88829.28
+    }
+  },
+  {
+    "engine": "powerinfer",
+    "prompt": "conversational",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 98202.21,
+      "prompt_tokens": 23,
+      "prompt_tok_per_sec": 0.23,
+      "eval_ms": 571077.52,
+      "eval_tokens": 31,
+      "ms_per_token": 18421.86,
+      "gen_tok_per_sec": 0.05,
+      "total_ms": 669304.64,
+      "load_ms": 53258.58
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "conversational",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 456.02,
+      "prompt_tokens": 22,
+      "prompt_tok_per_sec": 48.24,
+      "eval_ms": 1240.44,
+      "eval_tokens": 31,
+      "ms_per_token": 40.01,
+      "gen_tok_per_sec": 24.99,
+      "total_ms": 1700.73,
+      "load_ms": 70653.85
+    }
+  },
+  {
+    "engine": "powerinfer",
+    "prompt": "conversational",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 63186.34,
+      "prompt_tokens": 23,
+      "prompt_tok_per_sec": 0.36,
+      "eval_ms": 750362.32,
+      "eval_tokens": 63,
+      "ms_per_token": 11910.51,
+      "gen_tok_per_sec": 0.08,
+      "total_ms": 813600.01,
+      "load_ms": 83060.63
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "conversational",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 149.74,
+      "prompt_tokens": 22,
+      "prompt_tok_per_sec": 146.92,
+      "eval_ms": 1850.9,
+      "eval_tokens": 63,
+      "ms_per_token": 29.38,
+      "gen_tok_per_sec": 34.04,
+      "total_ms": 2008.99,
+      "load_ms": 66332.06
+    }
+  },
+  {
+    "engine": "powerinfer",
+    "prompt": "conversational",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 94543.18,
+      "prompt_tokens": 23,
+      "prompt_tok_per_sec": 0.24,
+      "eval_ms": 1640269.17,
+      "eval_tokens": 127,
+      "ms_per_token": 12915.51,
+      "gen_tok_per_sec": 0.08,
+      "total_ms": 1734915.32,
+      "load_ms": 57197.3
+    }
+  },
+  {
+    "engine": "llamacpp",
+    "prompt": "conversational",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "prompt_eval_ms": 173.97,
+      "prompt_tokens": 22,
+      "prompt_tok_per_sec": 126.46,
+      "eval_ms": 3712.96,
+      "eval_tokens": 127,
+      "ms_per_token": 29.24,
+      "gen_tok_per_sec": 34.2,
+      "total_ms": 3902.7,
+      "load_ms": 64160.34
+    }
+  }
+]

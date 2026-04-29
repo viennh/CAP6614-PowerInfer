@@ -1,0 +1,197 @@
+[
+  {
+    "engine": "vllm",
+    "prompt": "creative",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 30,
+      "eval_tokens": 32,
+      "gen_tok_per_sec": 20.952871943969868,
+      "total_ms": 1527.2369384765625
+    }
+  },
+  {
+    "engine": "vllm",
+    "prompt": "creative",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 30,
+      "eval_tokens": 64,
+      "gen_tok_per_sec": 57.936526874767445,
+      "total_ms": 1104.6571731567383
+    }
+  },
+  {
+    "engine": "vllm",
+    "prompt": "creative",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 30,
+      "eval_tokens": 128,
+      "gen_tok_per_sec": 58.48729561836807,
+      "total_ms": 2188.509464263916
+    }
+  },
+  {
+    "engine": "vllm",
+    "prompt": "code",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 22,
+      "eval_tokens": 32,
+      "gen_tok_per_sec": 57.549219307742604,
+      "total_ms": 556.0457706451416
+    }
+  },
+  {
+    "engine": "vllm",
+    "prompt": "code",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 22,
+      "eval_tokens": 64,
+      "gen_tok_per_sec": 58.53873470103393,
+      "total_ms": 1093.2931900024414
+    }
+  },
+  {
+    "engine": "vllm",
+    "prompt": "code",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 22,
+      "eval_tokens": 128,
+      "gen_tok_per_sec": 58.595808573743966,
+      "total_ms": 2184.4565868377686
+    }
+  },
+  {
+    "engine": "vllm",
+    "prompt": "factual",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 25,
+      "eval_tokens": 32,
+      "gen_tok_per_sec": 58.18071351690637,
+      "total_ms": 550.0104427337646
+    }
+  },
+  {
+    "engine": "vllm",
+    "prompt": "factual",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 25,
+      "eval_tokens": 64,
+      "gen_tok_per_sec": 58.2955401984132,
+      "total_ms": 1097.8541374206543
+    }
+  },
+  {
+    "engine": "vllm",
+    "prompt": "factual",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 25,
+      "eval_tokens": 128,
+      "gen_tok_per_sec": 58.634634774570436,
+      "total_ms": 2183.0101013183594
+    }
+  },
+  {
+    "engine": "vllm",
+    "prompt": "reasoning",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 31,
+      "eval_tokens": 32,
+      "gen_tok_per_sec": 58.20485924697544,
+      "total_ms": 549.7822761535645
+    }
+  },
+  {
+    "engine": "vllm",
+    "prompt": "reasoning",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 31,
+      "eval_tokens": 64,
+      "gen_tok_per_sec": 58.43696455277898,
+      "total_ms": 1095.1972007751465
+    }
+  },
+  {
+    "engine": "vllm",
+    "prompt": "reasoning",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 31,
+      "eval_tokens": 128,
+      "gen_tok_per_sec": 58.6211962538491,
+      "total_ms": 2183.5105419158936
+    }
+  },
+  {
+    "engine": "vllm",
+    "prompt": "conversational",
+    "n_tokens": 32,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 22,
+      "eval_tokens": 32,
+      "gen_tok_per_sec": 58.54991964626909,
+      "total_ms": 546.5421676635742
+    }
+  },
+  {
+    "engine": "vllm",
+    "prompt": "conversational",
+    "n_tokens": 64,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 22,
+      "eval_tokens": 64,
+      "gen_tok_per_sec": 58.57055150069396,
+      "total_ms": 1092.6992893218994
+    }
+  },
+  {
+    "engine": "vllm",
+    "prompt": "conversational",
+    "n_tokens": 128,
+    "run": 0,
+    "timings": {
+      "load_ms": 319278.4867286682,
+      "prompt_tokens": 22,
+      "eval_tokens": 128,
+      "gen_tok_per_sec": 58.604859369098534,
+      "total_ms": 2184.11922454834
+    }
+  }
+]
