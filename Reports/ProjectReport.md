@@ -23,6 +23,31 @@ This project deploys PowerInfer with the ReluLLaMA-7B model on consumer hardware
 | GPU cluster | UCF Newton HPC (NVIDIA GPUs, CUDA 12.6, GCC 12.2) |
 | Frameworks compared | PowerInfer, llama.cpp (upstream), vLLM |
 
+### 1.2 Four-phase experimental pipeline
+
+The project is organized as **four ordered stages** in **Figure 1.1**; the corresponding results and discussion appear in **Sections [2](#2-experiment-1-neuron-activation-distribution-profiling)–[4](#4-experiment-3-hot-neuron-variation-across-input-types)** (with a **13B** extension in [Section 5](#5-extension-relullama-13b-profiling-newton-vllm-and-neuron-overlap)). Each stage builds on the last: the right GGUFs and activation files must exist before we analyze them; that analysis frames *hot* behavior; throughput (Phase 3) and overlap (Phase 4) are interpretable only when the model and prompts are held consistent. Step-by-step commands are in [`ExperimentalSetup.md`](ExperimentalSetup.md).
+
+![Four-phase experimental pipeline](figures/4-phase-experimental-benchmark-pipeline.png)
+
+**Figure 1.1** — Overview of the four-phase workflow (prerequisites, activation profiling, speed benchmarking, hot-neuron overlap) and the shared prompt suite used in the later stages.
+
+**What each phase does**
+
+- **Phase 1 — Prerequisites and artifacts**  
+  Obtain the **PowerInfer** sparse GGUF, per-layer **activation** tensors (`activation_*.pt`), and a **CUDA** build of the inference stack where GPU experiments are run (PowerInfer’s `main`, `llama.cpp`’s `llama-completion` for dense baselines). Optionally prepare **HuggingFace**-format weights: Phase 4’s overlap experiment instruments the model forward pass in PyTorch, which expects HF checkpoints rather than GGUF.
+
+- **Phase 2 — Activation distribution profiling**  
+  Run `phase2_profile_neurons.py` on the shipped activation profiles to summarize, per layer, how concentrated activations are (e.g. coverage curves, Gini, heatmaps). This **does not** retrain the model; it **characterizes** the precomputed hot/cold statistics PowerInfer relies on, so we can discuss locality before interpreting speed or overlap.
+
+- **Phase 3 — Throughput benchmarking**  
+  Compare **end-to-end tokens/sec** (or equivalent runtime) for **PowerInfer** vs. **llama.cpp** (sparse vs. dense GGUF) and, on the cluster, **vLLM** (dense serving). Scripts `phase3_benchmark.py` and `phase3_vllm_benchmark.py` fix prompts and output lengths so runs are **repeatable**; results are stored under `Reports/results/phase3_benchmarks/`.
+
+- **Phase 4 — Hot-neuron overlap across prompt types**  
+  Using `phase4_neuron_variation.py`, we extract **top‑k** “hot” neuron id sets per layer and per **prompt category**, then measure **Jaccard overlap** (and related summaries) between categories. This tests whether the hot set is **universal** or **task-specific**—complementary to Phase 2’s global profile and Phase 3’s wall-clock numbers.
+
+- **Shared prompt suite (Phases 3 and 4)**  
+  The same **five category** prompts (creative, code, factual, reasoning, conversational) are used for both throughput and overlap analysis, so timing differences and overlap differences are tied to the **same** inputs, not a confounding change in text.
+
 ---
 
 ## 2. Experiment 1: Neuron Activation Distribution Profiling
@@ -447,6 +472,24 @@ The power-law activation distribution we confirmed in Phase 2 is not unique to R
 - **Activation-aware quantization** could combine with PowerInfer's approach — applying higher-precision quantization to hot neurons and aggressive compression to cold neurons.
 - **Dynamic sparse prediction** based on input type (as our Phase 4 data suggests) represents a promising direction for next-generation inference optimization.
 
+### 6.4 Impact, Capabilities, and Limitations (Summary)
+
+Stepping back from the per-engine token rates in **§3** and **§5**, the **practical impact** of PowerInfer as a *design* is to make **large-model inference on consumer or local hardware** more realistic **when the intended deployment can use a GPU–CPU hybrid** and a **ReLU-style** (sparse-activating) model such as ReluLLaMA. The paper’s reported speedups target that regime; our **CPU-only** experiments (**§3**) show high variance and confirm that the system is **not** aimed at a pure CPU laptop path (see also **§6.1**).
+
+**Capabilities and benefits** that motivate such systems in general include:
+
+- **Faster or more affordable local inference** — keeping a capable assistant on a **consumer GPU** (or small cluster budget) instead of defaulting to cloud API calls.
+- **Privacy** — prompts and outputs can **stay on device** or within a controlled environment when the full stack runs locally.
+- **Lower hardware cost** — relative to **server-class** or multi-tenant **datacenter** GPUs, at the cost of a more complex software stack and tuning.
+
+The method is **not universal**. In brief:
+
+- **Sparsity and model family:** Gains are largest when per-layer activations are **strongly skewed** (as in our Phase 2 analysis). **Standard SiLU/SwiGLU LLaMA** checkpoints do not yield the same zero-driven sparsity pattern; PowerInfer-style skipping is tied to **ReLU-family** (e.g. ReluLLaMA) models and quality trade-offs versus the original (**§6.2**). Where sparsity is **weak** or the predictor misfires, the benefit shrinks.
+- **Decode vs. prefill:** The sparse FFN path tends to help **repeated autoregressive steps** (generation) more than a **very long prefill** dominated by a single long prompt, where predictor and dense work can dominate (**§6.1**, **§6.2**).
+- **Engineering cost:** Compared with **plain weight offloading** (e.g. partial GPU layer offload in a standard runtime), PowerInfer adds **profiling data**, a **per-layer predictor**, **custom execution paths**, and **hybrid CPU–GPU scheduling** — a higher **implementation and operations** burden, even before discussing **static** profiles and **input-dependent** hot sets (**Phase 4**, **§6.2** point 4).
+
+**Open directions** align with the gaps above: **domain- or input-adaptive profiles**, **dynamic** hot sets (instead of a single static profile), and **prefill-oriented** optimizations or scheduling so the sparse path pays off across more workloads. These connect directly to the broader points in **§6.3**.
+
 ---
 
 ## 7. Conclusion
@@ -461,7 +504,19 @@ This project validated PowerInfer's core hypothesis through three experiments on
 
 ReluLLaMA-13B **PowerInfer** Phase 3 generation numbers in **§5.2** are **not** used here as evidence of PowerInfer throughput on 13B: that snapshot is treated as a **misconfigured or failed benchmark** until offload, build, threads, and memory are checked and the run is repeated (see **§5.2**).
 
-These findings support PowerInfer's design as an effective approach for deploying LLMs on consumer hardware, while also identifying opportunities for improvement through layer-aware and input-adaptive offloading strategies.
+These findings support PowerInfer's design as an **effective** approach for deploying **ReLU-based** LLMs on **resource-constrained** hardware **when a hybrid GPU–CPU** execution model is available, while also identifying opportunities for **layer-aware** and **input-adaptive** offloading. For a concise list of **practical impact, capabilities, and trade-offs** (including privacy, cost, sparsity assumptions, prefill effects, and engineering complexity), see **§6.4** alongside the detailed items in **§6.1**–**§6.2**.
+
+### 7.1 Design-level takeaways
+
+The empirical points above (activation locality, benchmark regime, and cross-input hot sets) can be compressed into **three** complementary **system** messages:
+
+1. **Skewed activations.** In feed-forward layers, activations are **heavily skewed** — a relatively **small** set of **hot** neurons accounts for most of the work, consistent with the power-law patterns in **§2** and the PowerInfer **paper**.
+
+2. **A full stack, not a single trick.** PowerInfer **operationalizes** that observation: **offline** profile-driven placement, **online** per-step prediction, **neuron-aware** FFN execution, and **hybrid** GPU–CPU **scheduling** form an integrated serving system, not a single operator or heuristic.
+
+3. **Impact is real but *regime-dependent*.** In **low-batch, local** generation, especially for **sparse** (ReLU-style) models and when the **hybrid** path is in play, the paper’s regime — large-model **serving** on **consumer GPUs** — is where the design matters most. Our **CPU-only** baselines (§3) and caveats in **§6.1**–**§6.4** show that the benefit is not automatic when that regime does not hold.
+
+*Final summary:* PowerInfer does not attempt to place the **entire** model in GPU memory. It **identifies the fraction that matters most, for most inputs**, and keeps that fraction on the **fastest** available hardware, while the remainder follows the system’s **cold** path (e.g. on CPU). That is the central **design** lesson of the work.
 
 ---
 
