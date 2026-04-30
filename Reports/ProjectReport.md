@@ -12,7 +12,52 @@ Large Language Models (LLMs) demand enormous computational resources for inferen
 
 This project deploys PowerInfer with the ReluLLaMA-7B model on consumer hardware, profiles the hot/cold neuron distribution, benchmarks inference speed against llama.cpp and vLLM, and analyzes how activated neuron sets vary across different input types.
 
-### 1.1 Model and Hardware
+### 1.1 How PowerInfer works: offline policy and online hybrid execution
+
+
+#### 1.1.1 Method detail #1 — Adaptive per-layer sparsity predictors
+
+PowerInfer relies on an **activation predictor** to decide which FFN neurons are likely to be active for the *current token*. A naive design would use a **fixed-size predictor** for every layer; however, this can consume substantial GPU memory (the PowerInfer paper notes that, at very large scales such as OPT‑175B, predictor state can become tens of GB if sized uniformly). To avoid “saving VRAM on weights but spending it on predictors,” PowerInfer makes predictors **layer-adaptive**:
+
+- **Per-layer sizing:** each transformer layer gets its own predictor capacity (e.g., hidden width), because sparsity/skewness varies by layer.
+- **Sparsity/skewness → smaller predictor:** layers with more concentrated activations (stronger locality) can use a smaller predictor while remaining accurate.
+- **Less sparse layers → larger predictor:** layers with more uniform activation patterns require more capacity to avoid prediction error.
+- **Accuracy guardrail:** predictor sizes are tuned iteratively until perplexity remains close to the baseline model.
+
+Net effect: the predictor is **small enough to fit alongside hot weights** in GPU memory while still producing activation masks that make sparse FFN execution worthwhile.
+
+#### 1.1.2 Method detail #2 — Neuron-aware sparse operators (dynamic sparsity)
+
+PowerInfer’s sparsity pattern is **dynamic** (changes per token) and **neuron-granular** (whole FFN neurons/rows/columns), which differs from classic sparse-matrix use cases where sparsity is relatively static and expressed in CSR/COO formats. As a result, generic sparse libraries are a poor fit because they often require expensive **format conversion** and sparse bookkeeping at runtime.
+
+PowerInfer instead uses **neuron-aware sparse operators**:
+
+- Compute only the **rows/columns corresponding to predicted-active neurons** (skipping inactive neurons entirely).
+- Avoid converting dense weights into sparse matrix formats on-the-fly.
+- Maintain small **neuron index tables** that map active neuron IDs to the corresponding weight slices.
+
+This design reduces runtime overhead and makes sparse execution practical on both CPU (for cold neurons) and GPU (for hot neurons).
+
+#### 1.1.3 Method detail #3 — Offline placement solver and hybrid runtime scheduling
+
+Selecting which neurons live on GPU is not simply “take the top‑k hottest,” because placement must respect both **GPU memory capacity** and **CPU↔GPU communication** costs. PowerInfer frames neuron placement as an **offline optimization problem**:
+
+- Objective: maximize expected benefit of GPU-resident neurons (activation frequency / expected compute saved) under a VRAM budget.
+- Constraints: GPU memory limit, and practical costs of moving activations/results between CPU and GPU.
+
+At runtime, PowerInfer executes a hybrid computation graph:
+
+- CPU and GPU executors consume ready operators from a **DAG**, enabling parallel work.
+- Synchronization happens only when required (e.g., before merging partial results).
+- The **merge remains on GPU**, keeping the fast device on the critical path and reducing PCIe weight traffic.
+
+Together, the solver and scheduler aim to keep the GPU doing a large share of *useful* FFN work even when the full model cannot fit in VRAM.
+
+![PowerInfer offline policy and online hybrid execution](figures/powerinfer-offline-policy-online-hybrid-exeution.png)
+
+**Figure 1.1** — Overview: **offline** profiling and hot/cold **policy** (placement), then **online** prediction and **hybrid** GPU–CPU execution. This is the *system* design; **Figure 1.2** situates *this project’s* experimental phases in that context.
+
+### 1.2 Model and Hardware
 
 | Component | Specification |
 |-----------|--------------|
@@ -23,13 +68,13 @@ This project deploys PowerInfer with the ReluLLaMA-7B model on consumer hardware
 | GPU cluster | UCF Newton HPC (NVIDIA GPUs, CUDA 12.6, GCC 12.2) |
 | Frameworks compared | PowerInfer, llama.cpp (upstream), vLLM |
 
-### 1.2 Four-phase experimental pipeline
+### 1.3 Four-phase experimental pipeline
 
-The project is organized as **four ordered stages** in **Figure 1.1**; the corresponding results and discussion appear in **Sections [2](#2-experiment-1-neuron-activation-distribution-profiling)–[4](#4-experiment-3-hot-neuron-variation-across-input-types)** (with a **13B** extension in [Section 5](#5-extension-relullama-13b-profiling-newton-vllm-and-neuron-overlap)). Each stage builds on the last: the right GGUFs and activation files must exist before we analyze them; that analysis frames *hot* behavior; throughput (Phase 3) and overlap (Phase 4) are interpretable only when the model and prompts are held consistent. Step-by-step commands are in [`ExperimentalSetup.md`](ExperimentalSetup.md).
+The project is organized as **four ordered stages** in **Figure 1.2**; the corresponding results and discussion appear in **Sections [2](#2-experiment-1-neuron-activation-distribution-profiling)–[4](#4-experiment-3-hot-neuron-variation-across-input-types)** (with a **13B** extension in [Section 5](#5-extension-relullama-13b-profiling-newton-vllm-and-neuron-overlap)). Each stage builds on the last: the right GGUFs and activation files must exist before we analyze them; that analysis frames *hot* behavior; throughput (Phase 3) and overlap (Phase 4) are interpretable only when the model and prompts are held consistent. Step-by-step commands are in [`ExperimentalSetup.md`](ExperimentalSetup.md).
 
 ![Four-phase experimental pipeline](figures/4-phase-experimental-benchmark-pipeline.png)
 
-**Figure 1.1** — Overview of the four-phase workflow (prerequisites, activation profiling, speed benchmarking, hot-neuron overlap) and the shared prompt suite used in the later stages.
+**Figure 1.2** — Overview of the four-phase **project** workflow (prerequisites, activation profiling, speed benchmarking, hot-neuron overlap) and the shared prompt suite used in the later stages.
 
 **What each phase does**
 
@@ -134,28 +179,69 @@ Each category is a single user message (exactly as passed to the respective runn
 
 All runs used `--ignore-eos` to force generation of the full requested token count, ensuring consistent comparisons.
 
-| Engine | Prompt | n=32 (tok/s) | n=64 (tok/s) | n=128 (tok/s) |
-|--------|--------|-------------|-------------|--------------|
-| **PowerInfer** | Creative | 0.77 | 0.94 | 2.26 |
-| llama.cpp | Creative | 3.18 | 15.35 | 15.77 |
-| **PowerInfer** | Code | 18.02 | 6.47 | 20.50 |
-| llama.cpp | Code | 16.08 | 17.56 | 17.57 |
-| **PowerInfer** | Factual | 16.98 | 18.84 | 7.99 |
-| llama.cpp | Factual | 17.95 | 17.86 | 17.39 |
-| **PowerInfer** | Reasoning | 8.26 | 5.37 | 2.77 |
-| llama.cpp | Reasoning | 9.92 | 15.87 | 16.71 |
-| **PowerInfer** | Conversational | 15.44 | 4.95 | 20.59 |
-| llama.cpp | Conversational | 17.70 | 17.79 | 17.95 |
+To match the grouped presentation used in our slides, Tables 3.2–3.4 report **tokens/sec by prompt category** for each output length.
+
+**Table 3.2 — 7B CPU throughput (n=32 tokens, Apple M4 Max)**
+
+| Prompt category | PowerInfer (tok/s) | llama.cpp (tok/s) |
+|---|---:|---:|
+| Creative | 0.77 | 3.18 |
+| Code | 18.02 | 16.08 |
+| Factual | 16.98 | 17.95 |
+| Reasoning | 8.26 | 9.92 |
+| Conversational | 15.44 | 17.70 |
+
+**Table 3.3 — 7B CPU throughput (n=64 tokens, Apple M4 Max)**
+
+| Prompt category | PowerInfer (tok/s) | llama.cpp (tok/s) |
+|---|---:|---:|
+| Creative | 0.94 | 15.35 |
+| Code | 6.47 | 17.56 |
+| Factual | 18.84 | 17.86 |
+| Reasoning | 5.37 | 15.87 |
+| Conversational | 4.95 | 17.79 |
+
+**Table 3.4 — 7B CPU throughput (n=128 tokens, Apple M4 Max)**
+
+| Prompt category | PowerInfer (tok/s) | llama.cpp (tok/s) |
+|---|---:|---:|
+| Creative | 2.26 | 15.77 |
+| Code | 20.50 | 17.57 |
+| Factual | 7.99 | 17.39 |
+| Reasoning | 2.77 | 16.71 |
+| Conversational | 20.59 | 17.95 |
 
 ### 3.3 Results (UCF Newton GPU — vLLM)
 
-| Engine | Prompt | n=32 (tok/s) | n=64 (tok/s) | n=128 (tok/s) |
-|--------|--------|-------------|-------------|--------------|
-| **vLLM** | Creative | 24.39* | 54.00 | 53.72 |
-| **vLLM** | Code | 53.94 | 54.16 | 53.90 |
-| **vLLM** | Factual | 53.95 | 54.12 | 53.81 |
-| **vLLM** | Reasoning | 53.82 | 54.04 | 53.72 |
-| **vLLM** | Conversational | 53.98 | 54.19 | 53.89 |
+**Table 3.5 — 7B GPU throughput (n=32 tokens, vLLM on Newton)**
+
+| Prompt category | vLLM (tok/s) |
+|---|---:|
+| Creative | 24.39* |
+| Code | 53.94 |
+| Factual | 53.95 |
+| Reasoning | 53.82 |
+| Conversational | 53.98 |
+
+**Table 3.6 — 7B GPU throughput (n=64 tokens, vLLM on Newton)**
+
+| Prompt category | vLLM (tok/s) |
+|---|---:|
+| Creative | 54.00 |
+| Code | 54.16 |
+| Factual | 54.12 |
+| Reasoning | 54.04 |
+| Conversational | 54.19 |
+
+**Table 3.7 — 7B GPU throughput (n=128 tokens, vLLM on Newton)**
+
+| Prompt category | vLLM (tok/s) |
+|---|---:|
+| Creative | 53.72 |
+| Code | 53.90 |
+| Factual | 53.81 |
+| Reasoning | 53.72 |
+| Conversational | 53.89 |
 
 *\* Creative n=32 was the first inference after model loading; the lower speed reflects a one-time warm-up cost (JIT compilation, CUDA kernel caching). All subsequent runs stabilize at ~54 tok/s.*
 
@@ -355,23 +441,37 @@ The table lists **generation throughput** (`gen_tok_per_sec`) from `benchmark_re
 
 **PowerInfer (13B):** Throughput ≈**0.01–0.08** tok/s, together with very large `prompt_eval_ms` and `eval_ms`, is **not** treated as evidence that the sparse checkpoint is a “bad” model. It indicates a **failed or misconfigured** PowerInfer run on Newton (wrong device path, build, or resource limits). Likely checks before any performance claim include **GPU offload** (`-ngl` / which layers sit on device), **CUDA vs CPU-only build**, **thread count**, and **host RAM / swap** so the sparse weights and predictors are not effectively thrashing. The committed rows are **kept for reproducibility only**; **re-run** Phase 3 after validating offload, build, threads, and memory—**do not** infer ReluLLaMA-13B PowerInfer speed from this snapshot alone.
 
-| Engine | Prompt | n=32 (tok/s) | n=64 (tok/s) | n=128 (tok/s) |
-|--------|--------|-------------|-------------|--------------|
-| **PowerInfer** | Creative | 0.01 | 0.02 | 0.03 |
-| **PowerInfer** | Code | 0.07 | 0.05 | 0.05 |
-| **PowerInfer** | Factual | 0.06 | 0.05 | 0.03 |
-| **PowerInfer** | Reasoning | 0.04 | 0.03 | 0.04 |
-| **PowerInfer** | Conversational | 0.05 | 0.08 | 0.08 |
-| **llama.cpp** | Creative | 27.77 | 34.00 | 30.64 |
-| **llama.cpp** | Code | 34.37 | 33.91 | 35.29 |
-| **llama.cpp** | Factual | 34.25 | 30.82 | 27.38 |
-| **llama.cpp** | Reasoning | 33.30 | 35.43 | 33.80 |
-| **llama.cpp** | Conversational | 24.99 | 34.04 | 34.20 |
-| **vLLM** | Creative | 20.95* | 57.94 | 58.49 |
-| **vLLM** | Code | 57.55 | 58.54 | 58.60 |
-| **vLLM** | Factual | 58.18 | 58.30 | 58.63 |
-| **vLLM** | Reasoning | 58.20 | 58.44 | 58.62 |
-| **vLLM** | Conversational | 58.55 | 58.57 | 58.60 |
+To align with the grouped plots used in the slide deck, Tables 5.1–5.3 report **tokens/sec by prompt category** for each output length.
+
+**Table 5.1 — 13B throughput (n=32 tokens, Newton)**
+
+| Prompt category | PowerInfer (tok/s) | llama.cpp (tok/s) | vLLM (tok/s) |
+|---|---:|---:|---:|
+| Creative | 0.01 | 27.77 | 20.95* |
+| Code | 0.07 | 34.37 | 57.55 |
+| Factual | 0.06 | 34.25 | 58.18 |
+| Reasoning | 0.04 | 33.30 | 58.20 |
+| Conversational | 0.05 | 24.99 | 58.55 |
+
+**Table 5.2 — 13B throughput (n=64 tokens, Newton)**
+
+| Prompt category | PowerInfer (tok/s) | llama.cpp (tok/s) | vLLM (tok/s) |
+|---|---:|---:|---:|
+| Creative | 0.02 | 34.00 | 57.94 |
+| Code | 0.05 | 33.91 | 58.54 |
+| Factual | 0.05 | 30.82 | 58.30 |
+| Reasoning | 0.03 | 35.43 | 58.44 |
+| Conversational | 0.08 | 34.04 | 58.57 |
+
+**Table 5.3 — 13B throughput (n=128 tokens, Newton)**
+
+| Prompt category | PowerInfer (tok/s) | llama.cpp (tok/s) | vLLM (tok/s) |
+|---|---:|---:|---:|
+| Creative | 0.03 | 30.64 | 58.49 |
+| Code | 0.05 | 35.29 | 58.60 |
+| Factual | 0.03 | 27.38 | 58.63 |
+| Reasoning | 0.04 | 33.80 | 58.62 |
+| Conversational | 0.08 | 34.20 | 58.60 |
 
 *\* vLLM Creative n=32 is the first generation after load; lower speed reflects one-time warm-up (see §3.3).*
 
