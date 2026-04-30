@@ -33,6 +33,14 @@ We deploy **PowerInfer** on a **consumer GPU** with an **OPT** or **LLaMA**-fami
 
 Project artifacts (scripts, plots, and result tables) live under [`Reports/`](Reports/) in this repository.
 
+## Experimental setup
+
+**Full procedure** (prerequisites, UCF Newton, Apple rebuild options, and Phases 1–4) is in [`Reports/ExperimentalSetup.md`](Reports/ExperimentalSetup.md). **Guidelines in brief:**
+
+- **Where it runs best:** The paper’s **GPU–CPU hybrid** (hot on GPU, cold on CPU) is built for **NVIDIA CUDA**. On **Apple Silicon**, runs are **CPU-oriented** (e.g. NEON/BLAS, not the discrete-GPU hot/cold path). **GPU** benchmarks and apples-to-apples comparisons with that design belong on a **CUDA** machine—this project uses **UCF Newton**; profiling and much analysis can be done **locally**.
+- **~16 GB VRAM nodes:** A single **F16** dense run is most realistic for **~7B**; **13B/70B** often need a **larger-GPU** partition, **quantized** baselines (e.g. llama.cpp), or you **document** partial-GPU/CPU behavior. **Phase 2** neuron profiling is **CPU and disk** only, not a VRAM bottleneck.
+- **HPC env (Newton):** Typical bootstrap is `module load` an Anaconda module, a project `.venv`, and `pip install -r requirements.txt`—see the report for exact module names and run scripts under [`Reports/scripts/ucf_newton/`](Reports/scripts/ucf_newton/).
+
 ## Links
 
 | Resource | URL |
